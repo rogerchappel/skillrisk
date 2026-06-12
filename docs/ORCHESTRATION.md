@@ -6,3 +6,7 @@
 4. Hand results to the next drafting or review agent.
 
 External actions require explicit human approval and are outside this package.
+
+## Dry-run Boundary
+
+All examples are dry-run by default. Downstream agents must request approval before external writes.
