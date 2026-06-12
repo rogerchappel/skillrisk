@@ -10,5 +10,10 @@
     "test": "node --test",
     "check": "node --check src/index.js && node --check src/cli.js",
     "smoke": "node src/cli.js fixtures/safe-skill.md"
-  }
+  },
+  "keywords": [
+    "agent-skill",
+    "local-first",
+    "dry-run"
+  ]
 }
