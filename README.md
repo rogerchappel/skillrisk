@@ -28,3 +28,9 @@ The package is intentionally local-first and does not publish, post, or write to
 ## Safety
 
 Review generated output before using it in public content or external workflows.
+
+## Example Workflow
+
+1. Prepare the local fixture.
+2. Run the smoke command.
+3. Review the report before drafting or acting.
