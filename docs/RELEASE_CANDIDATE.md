@@ -13,3 +13,9 @@ ship
 ## Notes
 
 Initial public build for skillrisk.
+
+## Readiness Checklist
+
+- [x] Tests pass locally.
+- [x] Smoke command uses fixtures.
+- [x] Side-effect boundaries are documented.
