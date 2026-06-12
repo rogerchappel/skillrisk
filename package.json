@@ -1,0 +1,14 @@
+{
+  "name": "skillrisk",
+  "version": "0.1.0",
+  "description": "Local-first risk checker for reusable agent skill instructions.",
+  "main": "src/index.js",
+  "bin": {
+    "skillrisk": "src/cli.js"
+  },
+  "scripts": {
+    "test": "node --test",
+    "check": "node --check src/index.js && node --check src/cli.js",
+    "smoke": "node src/cli.js fixtures/safe-skill.md"
+  }
+}
