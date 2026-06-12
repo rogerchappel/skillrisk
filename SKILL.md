@@ -23,3 +23,7 @@ Run `npm run smoke` after installing dependencies.
 ## Verification
 
 Run `npm test`, `npm run check`, and `npm run smoke`.
+
+## Failure Handling
+
+If validation fails, stop and report the failing command instead of continuing to downstream actions.
