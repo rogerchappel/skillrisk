@@ -25,5 +25,12 @@
   },
   "homepage": "https://github.com/rogerchappel/skillrisk#readme",
   "author": "Roger Chappel",
-  "license": "MIT"
+  "license": "MIT",
+  "files": [
+    "src",
+    "fixtures",
+    "docs",
+    "README.md",
+    "LICENSE"
+  ]
 }
