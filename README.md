@@ -34,3 +34,15 @@ Review generated output before using it in public content or external workflows.
 1. Prepare the local fixture.
 2. Run the smoke command.
 3. Review the report before drafting or acting.
+
+## Verification
+
+```sh
+npm run check
+npm test
+npm run smoke
+npm run package:smoke
+npm run release:check
+```
+
+Use `npm run release:check` before publishing or opening a release PR.
