@@ -35,9 +35,11 @@
     "src",
     "fixtures",
     "docs",
+    "CHANGELOG.md",
     "README.md",
     "LICENSE",
     "SECURITY.md",
+    "CONTRIBUTING.md",
     "SKILL.md"
   ]
 }
