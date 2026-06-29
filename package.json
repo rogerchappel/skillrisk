@@ -13,7 +13,7 @@
     "test": "node --test",
     "check": "node --check src/index.js && node --check src/cli.js",
     "smoke": "node src/cli.js fixtures/safe-skill.md",
-    "package:smoke": "npm pack --dry-run",
+    "package:smoke": "node scripts/package-smoke.js",
     "release:check": "npm run check && npm test && npm run smoke && npm run package:smoke"
   },
   "keywords": [
@@ -35,6 +35,7 @@
     "src",
     "fixtures",
     "docs",
+    "scripts",
     "CHANGELOG.md",
     "README.md",
     "LICENSE",
