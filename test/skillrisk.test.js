@@ -18,6 +18,25 @@ test('formats reports', () => {
   assert.match(formatReport(auditSkill('short')), /Skill Risk Report/);
 });
 
+test('cli exposes help and version', () => {
+  const help = execFileSync(process.execPath, ['src/cli.js', '--help'], { encoding: 'utf8' });
+  assert.match(help, /Usage: skillrisk/);
+
+  const version = execFileSync(process.execPath, ['src/cli.js', '--version'], { encoding: 'utf8' }).trim();
+  assert.match(version, /^\d+\.\d+\.\d+$/);
+});
+
+test('cli audits stdin and reports blocked input with exit code 2', () => {
+  const result = spawnSync(process.execPath, ['src/cli.js', '-'], {
+    input: 'Use when making summaries. Required inputs: a file. Validate with smoke tests.',
+    encoding: 'utf8',
+  });
+
+  assert.equal(result.status, 2);
+  assert.match(result.stdout, /Skill Risk Report/);
+  assert.match(result.stdout, /blocked/);
+});
+
 test('cli exposes help and version for package smoke checks', () => {
   const help = execFileSync(process.execPath, ['src/cli.js', '--help'], { cwd: process.cwd(), encoding: 'utf8' });
   assert.match(help, /Usage: skillrisk/);
