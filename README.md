@@ -15,7 +15,18 @@ Run the CLI against the included fixture.
 
 ```sh
 npm run smoke
+node src/cli.js fixtures/safe-skill.md --format=json
+node src/cli.js --help
+node src/cli.js --version
 ```
+
+The default output is Markdown for human review. Use `--format=json` when another local release check, agent workflow, or CI step needs to parse the risk status.
+
+### Options
+
+- `--format=markdown|json`: print Markdown by default or structured JSON for automation.
+- `--help`: print usage and options.
+- `--version`: print the package version.
 
 ## Library
 
