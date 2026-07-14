@@ -6,14 +6,36 @@
   "bin": {
     "skillrisk": "src/cli.js"
   },
+  "files": [
+    "src",
+    "fixtures",
+    "docs",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "test": "node --test",
     "check": "node --check src/index.js && node --check src/cli.js",
-    "smoke": "node src/cli.js fixtures/safe-skill.md"
+    "smoke": "node src/cli.js fixtures/safe-skill.md",
+    "package:smoke": "node scripts/package-smoke.js",
+    "release:check": "npm run check && npm test && npm run smoke && npm run package:smoke"
   },
   "keywords": [
     "agent-skill",
     "local-first",
     "dry-run"
-  ]
+  ],
+  "author": "Roger Chappel",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rogerchappel/skillrisk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rogerchappel/skillrisk/issues"
+  },
+  "homepage": "https://github.com/rogerchappel/skillrisk#readme",
+  "engines": {
+    "node": ">=18"
+  }
 }
