@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 const { execFileSync } = require('node:child_process');
 const fs = require('node:fs');
-const path = require('node:path');
 
 const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 const binEntries = typeof pkg.bin === 'string' ? { [pkg.name]: pkg.bin } : pkg.bin || {};
@@ -16,7 +15,18 @@ const output = execFileSync('npm', ['pack', '--dry-run', '--json'], { encoding: 
 const [pack] = JSON.parse(output);
 const files = new Set(pack.files.map((file) => file.path));
 
-for (const required of ['package.json', 'README.md', 'LICENSE', 'src/index.js', 'src/cli.js', 'fixtures/safe-skill.md']) {
+for (const required of [
+  'package.json',
+  'README.md',
+  'LICENSE',
+  'SECURITY.md',
+  'CHANGELOG.md',
+  'src/index.js',
+  'src/cli.js',
+  'fixtures/safe-skill.md',
+  'fixtures/risky-skill.md',
+  'docs/RELEASE_CANDIDATE.md'
+]) {
   if (!files.has(required)) {
     throw new Error(`npm pack is missing ${required}`);
   }

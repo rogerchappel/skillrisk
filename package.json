@@ -6,13 +6,9 @@
   "bin": {
     "skillrisk": "src/cli.js"
   },
-  "files": [
-    "src",
-    "fixtures",
-    "docs",
-    "README.md",
-    "LICENSE"
-  ],
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "test": "node --test",
     "check": "node --check src/index.js && node --check src/cli.js",
@@ -25,8 +21,6 @@
     "local-first",
     "dry-run"
   ],
-  "author": "Roger Chappel",
-  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/rogerchappel/skillrisk.git"
@@ -35,7 +29,18 @@
     "url": "https://github.com/rogerchappel/skillrisk/issues"
   },
   "homepage": "https://github.com/rogerchappel/skillrisk#readme",
-  "engines": {
-    "node": ">=18"
-  }
+  "author": "Roger Chappel",
+  "license": "MIT",
+  "files": [
+    "src",
+    "fixtures",
+    "docs",
+    "scripts",
+    "CHANGELOG.md",
+    "README.md",
+    "LICENSE",
+    "SECURITY.md",
+    "CONTRIBUTING.md",
+    "SKILL.md"
+  ]
 }
