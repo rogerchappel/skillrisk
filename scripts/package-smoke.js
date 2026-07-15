@@ -1,29 +1,41 @@
-const { spawnSync } = require('node:child_process');
+#!/usr/bin/env node
+const { execFileSync } = require('node:child_process');
+const fs = require('node:fs');
 
-const result = spawnSync('npm', ['pack', '--dry-run'], { encoding: 'utf8' });
-const output = `${result.stdout || ''}\n${result.stderr || ''}`;
+const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+const binEntries = typeof pkg.bin === 'string' ? { [pkg.name]: pkg.bin } : pkg.bin || {};
 
-if (result.status !== 0) {
-  process.stderr.write(output);
-  process.exit(result.status || 1);
+for (const [name, entry] of Object.entries(binEntries)) {
+  if (!fs.existsSync(entry)) {
+    throw new Error(`missing bin entry for ${name}: ${entry}`);
+  }
 }
 
-const required = [
-  'src/cli.js',
-  'src/index.js',
-  'fixtures/safe-skill.md',
-  'fixtures/risky-skill.md',
-  'docs/RELEASE_CANDIDATE.md',
+const output = execFileSync('npm', ['pack', '--dry-run', '--json'], { encoding: 'utf8' });
+const [pack] = JSON.parse(output);
+const files = new Set(pack.files.map((file) => file.path));
+
+for (const required of [
+  'package.json',
   'README.md',
   'LICENSE',
   'SECURITY.md',
-  'CHANGELOG.md'
-];
-
-const missing = required.filter((entry) => !output.includes(entry));
-if (missing.length > 0) {
-  console.error(`package smoke missing entries:\n${missing.join('\n')}`);
-  process.exit(1);
+  'CHANGELOG.md',
+  'src/index.js',
+  'src/cli.js',
+  'fixtures/safe-skill.md',
+  'fixtures/risky-skill.md',
+  'docs/RELEASE_CANDIDATE.md'
+]) {
+  if (!files.has(required)) {
+    throw new Error(`npm pack is missing ${required}`);
+  }
 }
 
-console.log('package smoke passed');
+for (const file of files) {
+  if (file.startsWith('test/') || file.startsWith('.github/')) {
+    throw new Error(`npm pack includes non-runtime file ${file}`);
+  }
+}
+
+console.log(`package smoke passed for ${pkg.name} with ${files.size} packed files`);
