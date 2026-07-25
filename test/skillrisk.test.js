@@ -14,6 +14,27 @@ test('blocks missing side-effect and approval boundaries', () => {
   assert.ok(result.findings.some((f) => f.code === 'missing-side-effects'));
 });
 
+test('does not treat negated and incomplete declarations as readiness evidence', () => {
+  const result = auditSkill('Use when reviewing. Inputs required. There are no documented side effects or approval requirements. No validation test exists.');
+  assert.equal(result.status, 'blocked');
+  assert.deepEqual(
+    result.findings.map((finding) => finding.code),
+    ['missing-side-effects', 'missing-approval', 'missing-validation']
+  );
+});
+
+test('cli blocks negated boundary declarations from stdin', () => {
+  const result = spawnSync(process.execPath, ['src/cli.js', '-', '--format=json'], {
+    input: 'Use when reviewing. Inputs required. There are no documented side effects or approval requirements. No validation test exists.\n',
+    encoding: 'utf8',
+  });
+
+  assert.equal(result.status, 2);
+  const report = JSON.parse(result.stdout);
+  assert.ok(report.findings.some((finding) => finding.code === 'missing-side-effects'));
+  assert.ok(report.findings.some((finding) => finding.code === 'missing-approval'));
+});
+
 test('formats reports', () => {
   assert.match(formatReport(auditSkill('short')), /Skill Risk Report/);
 });
