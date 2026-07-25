@@ -35,6 +35,10 @@ Import from `src/index.js` in local automation.
 ## Limitations
 
 The package is intentionally local-first and does not publish, post, or write to external systems.
+Its boundary audit recognizes explicit, short declarations rather than interpreting arbitrary prose.
+Negated or incomplete statements such as “no documented side effects” do not satisfy a rule.
+The checker is a release-readiness prompt, not a substitute for human review of whether a
+declaration is accurate or complete.
 
 ## Safety
 
