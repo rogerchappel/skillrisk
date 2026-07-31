@@ -1,7 +1,7 @@
 function hasDeclaration(text, affirmative, incomplete) {
   return String(text || '')
     .split(/[\n.!?]+/)
-    .some((clause) => affirmative.test(clause) && !incomplete.test(clause));
+    .some((clause) => affirmative.test(clause) && !incomplete.test(clause.replace(/\bno external\b/gi, 'external')));
 }
 
 const RULES = [

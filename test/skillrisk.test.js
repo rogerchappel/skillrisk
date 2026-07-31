@@ -44,6 +44,7 @@ test('preserves explicit affirmative boundary declarations', () => {
     'This is local-only. Ask before external actions.',
     'Dry-run mode. Approval is required before publishing.',
     'No external writes. Ask for approval before publishing.',
+    'Side effects: no external writes. Approval required before publishing.',
   ];
 
   for (const boundaries of cases) {
