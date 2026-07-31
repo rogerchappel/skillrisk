@@ -36,7 +36,12 @@ Import from `src/index.js` in local automation.
 
 The package is intentionally local-first and does not publish, post, or write to external systems.
 Its boundary audit recognizes explicit, short declarations rather than interpreting arbitrary prose.
-Negated or incomplete statements such as “no documented side effects” do not satisfy a rule.
+Within a sentence-like clause, a side-effect or approval declaration containing `no`, `not`,
+`missing`, `undocumented`, `unspecified`, or `unknown` does not satisfy that boundary rule,
+regardless of whether the qualifier comes before or after the boundary term. Explicit forms such
+as “Side effects: none”, “local-only”, “no external writes”, “dry-run”, “approval required before”,
+and “ask before” remain affirmative declarations. The checker splits clauses at newlines and `.`,
+`!`, or `?`; it does not perform semantic interpretation across clauses.
 The checker is a release-readiness prompt, not a substitute for human review of whether a
 declaration is accurate or complete.
 

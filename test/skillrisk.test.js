@@ -23,9 +23,51 @@ test('does not treat negated and incomplete declarations as readiness evidence',
   );
 });
 
+test('rejects incomplete boundary declarations regardless of word order', () => {
+  const cases = [
+    'Side effects are not documented. Approval is not required before external actions.',
+    'Side effects remain unknown. Approval requirements are unspecified.',
+    'Missing side effects. Undocumented approval requirements.',
+  ];
+
+  for (const boundaries of cases) {
+    const result = auditSkill(`Use when reviewing. Inputs required. ${boundaries} Validate with npm test.`);
+    assert.equal(result.status, 'blocked', boundaries);
+    assert.ok(result.findings.some((finding) => finding.code === 'missing-side-effects'), boundaries);
+    assert.ok(result.findings.some((finding) => finding.code === 'missing-approval'), boundaries);
+  }
+});
+
+test('preserves explicit affirmative boundary declarations', () => {
+  const cases = [
+    'Side effects: none. Approval required before external writes.',
+    'This is local-only. Ask before external actions.',
+    'Dry-run mode. Approval is required before publishing.',
+    'No external writes. Ask for approval before publishing.',
+    'Side effects: no external writes. Approval required before publishing.',
+  ];
+
+  for (const boundaries of cases) {
+    const result = auditSkill(`Use when reviewing. Inputs required. ${boundaries} Validate with npm test.`);
+    assert.equal(result.status, 'pass', boundaries);
+  }
+});
+
 test('cli blocks negated boundary declarations from stdin', () => {
   const result = spawnSync(process.execPath, ['src/cli.js', '-', '--format=json'], {
     input: 'Use when reviewing. Inputs required. There are no documented side effects or approval requirements. No validation test exists.\n',
+    encoding: 'utf8',
+  });
+
+  assert.equal(result.status, 2);
+  const report = JSON.parse(result.stdout);
+  assert.ok(report.findings.some((finding) => finding.code === 'missing-side-effects'));
+  assert.ok(report.findings.some((finding) => finding.code === 'missing-approval'));
+});
+
+test('cli blocks reversed-order incomplete boundary declarations from stdin', () => {
+  const result = spawnSync(process.execPath, ['src/cli.js', '-', '--format=json'], {
+    input: 'Use when reviewing. Inputs required. Side effects are not documented. Approval is not required before external actions. Validate with npm test.\n',
     encoding: 'utf8',
   });
 
