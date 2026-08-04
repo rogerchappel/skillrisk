@@ -4,6 +4,7 @@
 
 - Add `--format=json` CLI output for automation-friendly release checks.
 - Document the CLI help, version, and output-format options in the README.
+- Reject unknown, duplicate, conflicting, and extra CLI arguments with documented exit statuses.
 
 ## 0.1.0
 
