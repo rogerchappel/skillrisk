@@ -119,5 +119,41 @@ test('cli emits JSON for automation', () => {
 test('cli rejects unknown output formats', () => {
   const result = spawnSync(process.execPath, ['src/cli.js', 'fixtures/safe-skill.md', '--format=yaml'], { cwd: process.cwd(), encoding: 'utf8' });
   assert.equal(result.status, 1);
-  assert.match(result.stderr, /format must be markdown or json/);
+  assert.match(result.stderr, /invalid format: yaml/);
+  assert.match(result.stderr, /Usage: skillrisk/);
+});
+
+test('cli rejects unknown options', () => {
+  const result = spawnSync(process.execPath, ['src/cli.js', 'fixtures/safe-skill.md', '--wat'], { cwd: process.cwd(), encoding: 'utf8' });
+  assert.equal(result.status, 1);
+  assert.equal(result.stdout, '');
+  assert.match(result.stderr, /^skillrisk: unknown option: --wat\nUsage: skillrisk/m);
+});
+
+test('cli rejects duplicate and conflicting format options', () => {
+  for (const formats of [
+    ['--format=json', '--format=json'],
+    ['--format=json', '--format=markdown'],
+  ]) {
+    const result = spawnSync(process.execPath, ['src/cli.js', 'fixtures/safe-skill.md', ...formats], { cwd: process.cwd(), encoding: 'utf8' });
+    assert.equal(result.status, 1, formats.join(' '));
+    assert.match(result.stderr, /format option may only be specified once/, formats.join(' '));
+    assert.match(result.stderr, /Usage: skillrisk/, formats.join(' '));
+  }
+});
+
+test('cli rejects extra positional inputs', () => {
+  const result = spawnSync(process.execPath, ['src/cli.js', 'fixtures/safe-skill.md', 'fixtures/risky-skill.md'], { cwd: process.cwd(), encoding: 'utf8' });
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /expected at most one input/);
+  assert.match(result.stderr, /Usage: skillrisk/);
+});
+
+test('cli rejects help or version combined with other arguments', () => {
+  for (const args of [['--help', 'fixtures/safe-skill.md'], ['--version', '--format=json']]) {
+    const result = spawnSync(process.execPath, ['src/cli.js', ...args], { cwd: process.cwd(), encoding: 'utf8' });
+    assert.equal(result.status, 1, args.join(' '));
+    assert.match(result.stderr, /must be used alone/, args.join(' '));
+    assert.match(result.stderr, /Usage: skillrisk/, args.join(' '));
+  }
 });
