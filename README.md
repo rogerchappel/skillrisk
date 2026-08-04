@@ -28,6 +28,17 @@ The default output is Markdown for human review. Use `--format=json` when anothe
 - `--help`: print usage and options.
 - `--version`: print the package version.
 
+Pass at most one input path (or `-` for stdin) and at most one `--format` option. Unknown
+options, duplicate or conflicting format options, unsupported formats, and extra input paths
+are usage errors. `--help` and `--version` must each be used alone. Usage errors print a
+concise message and the usage line to stderr.
+
+### Exit status
+
+- `0`: the input passes the audit, or help/version was requested.
+- `1`: the command line is invalid or the input cannot be read.
+- `2`: the audit completed and produced a blocked report.
+
 ## Library
 
 Import from `src/index.js` in local automation.
