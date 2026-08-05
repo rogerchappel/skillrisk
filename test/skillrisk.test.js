@@ -23,6 +23,33 @@ test('does not treat negated and incomplete declarations as readiness evidence',
   );
 });
 
+test('rejects explicit unresolved language across every readiness rule', () => {
+  const result = auditSkill("I don't know when to use this. Inputs are TBD. Side effects cannot be determined. Approval TBD. Tests TBD.");
+
+  assert.equal(result.status, 'blocked');
+  assert.deepEqual(
+    result.findings.map((finding) => finding.code),
+    ['missing-use-case', 'missing-inputs', 'missing-side-effects', 'missing-approval', 'missing-validation']
+  );
+});
+
+test('rejects unresolved word orders and natural contractions', () => {
+  const cases = [
+    "When to use this isn't known. TBD inputs. Side effects haven't been determined. Approval can't be determined. Validation isn't specified.",
+    "It is not known when to use this. Required inputs cannot be determined. Cannot determine side effects. We haven't determined approval requirements. We don't know the tests.",
+  ];
+
+  for (const text of cases) {
+    const result = auditSkill(text);
+    assert.equal(result.status, 'blocked', text);
+    assert.deepEqual(
+      result.findings.map((finding) => finding.code),
+      ['missing-use-case', 'missing-inputs', 'missing-side-effects', 'missing-approval', 'missing-validation'],
+      text
+    );
+  }
+});
+
 test('rejects incomplete boundary declarations regardless of word order', () => {
   const cases = [
     'Side effects are not documented. Approval is not required before external actions.',
@@ -63,6 +90,21 @@ test('cli blocks negated boundary declarations from stdin', () => {
   const report = JSON.parse(result.stdout);
   assert.ok(report.findings.some((finding) => finding.code === 'missing-side-effects'));
   assert.ok(report.findings.some((finding) => finding.code === 'missing-approval'));
+});
+
+test('cli does not pass wholly unresolved declarations from stdin', () => {
+  const result = spawnSync(process.execPath, ['src/cli.js', '-', '--format=json'], {
+    input: "I don't know when to use this. Inputs are TBD. Side effects cannot be determined. Approval TBD. Tests TBD.\n",
+    encoding: 'utf8',
+  });
+
+  assert.equal(result.status, 2);
+  const report = JSON.parse(result.stdout);
+  assert.equal(report.status, 'blocked');
+  assert.deepEqual(
+    report.findings.map((finding) => finding.code),
+    ['missing-use-case', 'missing-inputs', 'missing-side-effects', 'missing-approval', 'missing-validation']
+  );
 });
 
 test('cli blocks reversed-order incomplete boundary declarations from stdin', () => {
