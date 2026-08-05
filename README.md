@@ -48,11 +48,14 @@ Import from `src/index.js` in local automation.
 The package is intentionally local-first and does not publish, post, or write to external systems.
 Its boundary audit recognizes explicit, short declarations rather than interpreting arbitrary prose.
 Within a sentence-like clause, a side-effect or approval declaration containing `no`, `not`,
-`missing`, `undocumented`, `unspecified`, or `unknown` does not satisfy that boundary rule,
-regardless of whether the qualifier comes before or after the boundary term. Explicit forms such
-as “Side effects: none”, “local-only”, “no external writes”, “dry-run”, “approval required before”,
-and “ask before” remain affirmative declarations. The checker splits clauses at newlines and `.`,
-`!`, or `?`; it does not perform semantic interpretation across clauses.
+`missing`, `undocumented`, `unspecified`, `unknown`, or `TBD` does not satisfy that boundary rule,
+regardless of whether the qualifier comes before or after the boundary term. The same unresolved
+language is rejected for use-case, input, and validation declarations. The checker also recognizes
+common explicit uncertainty forms such as “cannot be determined”, “don't know”, “can't determine”,
+“isn't known”, and “haven't determined”. Explicit forms such as “Side effects: none”, “local-only”,
+“no external writes”, “dry-run”, “approval required before”, and “ask before” remain affirmative
+declarations. The checker splits clauses at newlines and `.`, `!`, or `?`; it does not perform
+semantic interpretation across clauses.
 The checker is a release-readiness prompt, not a substitute for human review of whether a
 declaration is accurate or complete.
 
