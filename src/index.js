@@ -4,12 +4,14 @@ function hasDeclaration(text, affirmative, incomplete) {
     .some((clause) => affirmative.test(clause) && !incomplete.test(clause.replace(/\bno external\b/gi, 'external')));
 }
 
+const UNRESOLVED = /\b(?:tbd|no|not|missing|undocumented|unspecified|unknown)\b|\b(?:cannot|can['’]t)\s+(?:be\s+)?determin(?:e|ed)\b|\b(?:do\s+not|don['’]t)\s+know\b|\b(?:has|have|had)\s+not\s+(?:been\s+)?determin(?:e|ed)\b|\b(?:hasn['’]t|haven['’]t|hadn['’]t)\s+(?:been\s+)?determin(?:e|ed)\b|\b(?:isn['’]t|aren['’]t|wasn['’]t|weren['’]t)\s+(?:known|documented|specified|determined)\b/i;
+
 const RULES = [
-  { code: 'missing-use-case', severity: 'warn', test: (t) => hasDeclaration(t, /\b(?:use when|when to use)\b/i, /\b(?:no|not|missing|undocumented|unspecified)\b/i), message: 'Add a clear when-to-use section.' },
-  { code: 'missing-inputs', severity: 'warn', test: (t) => hasDeclaration(t, /\b(?:inputs?|requires?|required)\b/i, /\b(?:no|not|missing|undocumented|unspecified|unknown)\b/i), message: 'List required inputs or tools.' },
-  { code: 'missing-side-effects', severity: 'block', test: (t) => hasDeclaration(t, /\b(?:side effects?|local-only|no external|dry-run)\b/i, /^(?=.*\bside effects?\b)(?=.*\b(?:no|not|missing|undocumented|unspecified|unknown)\b)/i), message: 'State side-effect boundaries.' },
-  { code: 'missing-approval', severity: 'block', test: (t) => hasDeclaration(t, /\b(?:approval|required before|ask before)\b/i, /^(?=.*\bapproval(?: requirements?)?\b)(?=.*\b(?:no|not|missing|undocumented|unspecified|unknown)\b)/i), message: 'Declare approval requirements for external actions.' },
-  { code: 'missing-validation', severity: 'warn', test: (t) => hasDeclaration(t, /\b(?:validate|validation|verification|tests?|smoke)\b/i, /\b(?:no|not|missing|undocumented|unspecified|unknown)\s+(?:validation|verification|tests?|smoke)\b/i), message: 'Describe validation or verification workflow.' }
+  { code: 'missing-use-case', severity: 'warn', test: (t) => hasDeclaration(t, /\b(?:use when|when to use)\b/i, UNRESOLVED), message: 'Add a clear when-to-use section.' },
+  { code: 'missing-inputs', severity: 'warn', test: (t) => hasDeclaration(t, /\b(?:inputs?|requires?|required)\b/i, UNRESOLVED), message: 'List required inputs or tools.' },
+  { code: 'missing-side-effects', severity: 'block', test: (t) => hasDeclaration(t, /\b(?:side effects?|local-only|no external|dry-run)\b/i, UNRESOLVED), message: 'State side-effect boundaries.' },
+  { code: 'missing-approval', severity: 'block', test: (t) => hasDeclaration(t, /\b(?:approval|required before|ask before)\b/i, UNRESOLVED), message: 'Declare approval requirements for external actions.' },
+  { code: 'missing-validation', severity: 'warn', test: (t) => hasDeclaration(t, /\b(?:validate|validation|verification|tests?|smoke)\b/i, UNRESOLVED), message: 'Describe validation or verification workflow.' }
 ];
 function auditSkill(text) {
   const body = String(text || '');
