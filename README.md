@@ -47,6 +47,8 @@ Import from `src/index.js` in local automation.
 
 The package is intentionally local-first and does not publish, post, or write to external systems.
 Its boundary audit recognizes explicit, short declarations rather than interpreting arbitrary prose.
+Readiness headings and labels must include substantive declaration content; empty sections such as
+`## Inputs` or a bare `Approval requirements:` label do not satisfy a rule.
 Within a sentence-like clause, a side-effect or approval declaration containing `no`, `not`,
 `missing`, `undocumented`, `unspecified`, `unknown`, or `TBD` does not satisfy that boundary rule,
 regardless of whether the qualifier comes before or after the boundary term. The same unresolved

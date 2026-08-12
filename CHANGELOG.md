@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Require substantive content after readiness headings and labels instead of accepting empty section skeletons.
 - Add `--format=json` CLI output for automation-friendly release checks.
 - Document the CLI help, version, and output-format options in the README.
 - Reject unknown, duplicate, conflicting, and extra CLI arguments with documented exit statuses.
