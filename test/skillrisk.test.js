@@ -8,6 +8,23 @@ test('passes complete skill text', () => {
   assert.equal(result.status, 'pass');
 });
 
+test('rejects empty and placeholder-only readiness sections', () => {
+  const cases = [
+    '## When to use\n## Inputs\n## Side effects\n## Approval requirements\n## Validation',
+    'When to use:\nInputs:\nSide effects:\nApproval requirements:\nValidation:',
+  ];
+
+  for (const text of cases) {
+    const result = auditSkill(text);
+    assert.equal(result.status, 'blocked', text);
+    assert.deepEqual(
+      result.findings.map((finding) => finding.code),
+      ['missing-use-case', 'missing-inputs', 'missing-side-effects', 'missing-approval', 'missing-validation'],
+      text
+    );
+  }
+});
+
 test('blocks missing side-effect and approval boundaries', () => {
   const result = auditSkill('Use when making summaries. Required inputs: a file. Validate with smoke tests.');
   assert.equal(result.status, 'blocked');
@@ -105,6 +122,29 @@ test('cli does not pass wholly unresolved declarations from stdin', () => {
     report.findings.map((finding) => finding.code),
     ['missing-use-case', 'missing-inputs', 'missing-side-effects', 'missing-approval', 'missing-validation']
   );
+});
+
+test('cli reports headings-only fixtures as missing in JSON and Markdown', () => {
+  for (const format of ['json', 'markdown']) {
+    const result = spawnSync(process.execPath, ['src/cli.js', 'fixtures/headings-only-skill.md', `--format=${format}`], {
+      encoding: 'utf8',
+    });
+
+    assert.equal(result.status, 2, format);
+    if (format === 'json') {
+      const report = JSON.parse(result.stdout);
+      assert.equal(report.status, 'blocked');
+      assert.deepEqual(
+        report.findings.map((finding) => finding.code),
+        ['missing-use-case', 'missing-inputs', 'missing-side-effects', 'missing-approval', 'missing-validation']
+      );
+    } else {
+      assert.match(result.stdout, /Status: blocked/);
+      for (const code of ['missing-use-case', 'missing-inputs', 'missing-side-effects', 'missing-approval', 'missing-validation']) {
+        assert.match(result.stdout, new RegExp(code));
+      }
+    }
+  }
 });
 
 test('cli blocks reversed-order incomplete boundary declarations from stdin', () => {
