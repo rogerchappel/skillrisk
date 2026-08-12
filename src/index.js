@@ -1,7 +1,17 @@
 function hasDeclaration(text, affirmative, incomplete) {
   return String(text || '')
     .split(/[\n.!?]+/)
-    .some((clause) => affirmative.test(clause) && !incomplete.test(clause.replace(/\bno external\b/gi, 'external')));
+    .some((clause) => {
+      if (!affirmative.test(clause) || incomplete.test(clause.replace(/\bno external\b/gi, 'external'))) return false;
+
+      const remainder = clause
+        .replace(affirmative, ' ')
+        .replace(/\brequirements?\b/gi, ' ')
+        .replace(/[^\p{L}\p{N}]+/gu, ' ')
+        .trim();
+
+      return remainder.length > 0;
+    });
 }
 
 const UNRESOLVED = /\b(?:tbd|no|not|missing|undocumented|unspecified|unknown)\b|\b(?:cannot|can['’]t)\s+(?:be\s+)?determin(?:e|ed)\b|\b(?:do\s+not|don['’]t)\s+know\b|\b(?:has|have|had)\s+not\s+(?:been\s+)?determin(?:e|ed)\b|\b(?:hasn['’]t|haven['’]t|hadn['’]t)\s+(?:been\s+)?determin(?:e|ed)\b|\b(?:isn['’]t|aren['’]t|wasn['’]t|weren['’]t)\s+(?:known|documented|specified|determined)\b/i;
