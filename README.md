@@ -56,8 +56,11 @@ language is rejected for use-case, input, and validation declarations. The check
 common explicit uncertainty forms such as “cannot be determined”, “don't know”, “can't determine”,
 “isn't known”, and “haven't determined”. Explicit forms such as “Side effects: none”, “local-only”,
 “no external writes”, “dry-run”, “approval required before”, and “ask before” remain affirmative
-declarations. The checker splits clauses at newlines and `.`, `!`, or `?`; it does not perform
-semantic interpretation across clauses.
+declarations. The corresponding readiness rules also accept the explicit absence forms “no inputs
+are required”, “no approval is required”, and “no tests are required”; reversed or qualified
+negations such as “inputs are not required” or “no documented inputs are required” remain
+unresolved. The checker splits clauses at newlines and `.`, `!`, or `?`; it does not perform semantic
+interpretation across clauses.
 The checker is a release-readiness prompt, not a substitute for human review of whether a
 declaration is accurate or complete.
 
