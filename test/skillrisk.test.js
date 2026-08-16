@@ -97,6 +97,31 @@ test('preserves explicit affirmative boundary declarations', () => {
   }
 });
 
+test('accepts explicit absence declarations for inputs, approval, and tests', () => {
+  const result = auditSkill(
+    'When to use: audit a local skill. Inputs: no inputs are required. Side effects: none. Approval: no approval is required. Validation: no tests are required.'
+  );
+
+  assert.equal(result.status, 'pass');
+  assert.deepEqual(result.findings, []);
+});
+
+test('does not generalize explicit absence declarations to unresolved negations', () => {
+  const cases = [
+    'Inputs: no documented inputs are required. Approval: no known approval is required. Validation: no specified tests are required.',
+    'Inputs are not required. Approval is not required. Tests are not required.',
+  ];
+
+  for (const declarations of cases) {
+    const result = auditSkill(`When to use: audit a local skill. ${declarations} Side effects: none.`);
+    assert.deepEqual(
+      result.findings.map((finding) => finding.code),
+      ['missing-inputs', 'missing-approval', 'missing-validation'],
+      declarations
+    );
+  }
+});
+
 test('cli blocks negated boundary declarations from stdin', () => {
   const result = spawnSync(process.execPath, ['src/cli.js', '-', '--format=json'], {
     input: 'Use when reviewing. Inputs required. There are no documented side effects or approval requirements. No validation test exists.\n',
@@ -107,6 +132,16 @@ test('cli blocks negated boundary declarations from stdin', () => {
   const report = JSON.parse(result.stdout);
   assert.ok(report.findings.some((finding) => finding.code === 'missing-side-effects'));
   assert.ok(report.findings.some((finding) => finding.code === 'missing-approval'));
+});
+
+test('cli passes explicit absence declarations from stdin', () => {
+  const result = spawnSync(process.execPath, ['src/cli.js', '-', '--format=json'], {
+    input: 'When to use: audit a local skill. Inputs: no inputs are required. Side effects: none. Approval: no approval is required. Validation: no tests are required.\n',
+    encoding: 'utf8',
+  });
+
+  assert.equal(result.status, 0);
+  assert.deepEqual(JSON.parse(result.stdout), { status: 'pass', findings: [] });
 });
 
 test('cli does not pass wholly unresolved declarations from stdin', () => {
