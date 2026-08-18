@@ -7,6 +7,7 @@ Thanks for helping improve skillrisk.
 Run these before opening a pull request:
 
 ```sh
+npm ci
 npm run release:check
 ```
 
