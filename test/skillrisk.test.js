@@ -97,6 +97,27 @@ test('preserves explicit affirmative boundary declarations', () => {
   }
 });
 
+test('accepts documented standalone side-effect declarations', () => {
+  for (const boundary of ['local-only', 'dry-run']) {
+    const result = auditSkill(`Use when reviewing. Inputs required.\n${boundary}\nApproval required before publishing. Validate with npm test.`);
+    assert.equal(result.status, 'pass', boundary);
+    assert.deepEqual(result.findings, [], boundary);
+  }
+});
+
+test('does not accept guarded standalone side-effect lookalikes', () => {
+  for (const boundary of [
+    'Side effects:',
+    'local-only is not documented',
+    'dry-run remains unknown',
+    '```text\nlocal-only\n```',
+    '~~~text\ndry-run\n~~~',
+  ]) {
+    const result = auditSkill(`Use when reviewing. Inputs required.\n${boundary}\nApproval required before publishing. Validate with npm test.`);
+    assert.ok(result.findings.some((finding) => finding.code === 'missing-side-effects'), boundary);
+  }
+});
+
 test('accepts explicit absence declarations for inputs, approval, and tests', () => {
   const result = auditSkill(
     'When to use: audit a local skill. Inputs: no inputs are required. Side effects: none. Approval: no approval is required. Validation: no tests are required.'
@@ -142,6 +163,18 @@ test('cli passes explicit absence declarations from stdin', () => {
 
   assert.equal(result.status, 0);
   assert.deepEqual(JSON.parse(result.stdout), { status: 'pass', findings: [] });
+});
+
+test('cli accepts standalone side-effect declarations from stdin', () => {
+  for (const boundary of ['local-only', 'dry-run']) {
+    const result = spawnSync(process.execPath, ['src/cli.js', '-', '--format=json'], {
+      input: `Use when reviewing. Inputs required. ${boundary}. Approval required before publishing. Validate with npm test.\n`,
+      encoding: 'utf8',
+    });
+
+    assert.equal(result.status, 0, boundary);
+    assert.deepEqual(JSON.parse(result.stdout), { status: 'pass', findings: [] }, boundary);
+  }
 });
 
 test('cli does not pass wholly unresolved declarations from stdin', () => {
