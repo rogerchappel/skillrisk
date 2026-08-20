@@ -1,5 +1,9 @@
-function hasDeclaration(text, affirmative, incomplete, explicitAbsence) {
-  return String(text || '')
+function withoutFencedExamples(text) {
+  return String(text || '').replace(/^ {0,3}(`{3,}|~{3,})[^\n]*\n[\s\S]*?^ {0,3}\1[ \t]*$/gm, '');
+}
+
+function hasDeclaration(text, affirmative, incomplete, explicitAbsence, standalone) {
+  return withoutFencedExamples(text)
     .split(/[\n.!?]+/)
     .some((clause) => {
       const unresolvedClause = clause.replace(/\bno external\b/gi, 'external');
@@ -7,6 +11,8 @@ function hasDeclaration(text, affirmative, incomplete, explicitAbsence) {
         !affirmative.test(clause) ||
         (incomplete.test(unresolvedClause) && !(explicitAbsence && explicitAbsence.test(clause)))
       ) return false;
+
+      if (standalone && standalone.test(clause.trim())) return true;
 
       const remainder = clause
         .replace(affirmative, ' ')
@@ -22,11 +28,12 @@ const UNRESOLVED = /\b(?:tbd|no|not|missing|undocumented|unspecified|unknown)\b|
 const NO_INPUTS_REQUIRED = /\bno\s+inputs?\s+(?:is|are)\s+required\b/i;
 const NO_APPROVAL_REQUIRED = /\bno\s+approval\s+is\s+required\b/i;
 const NO_TESTS_REQUIRED = /\bno\s+tests?\s+(?:is|are)\s+required\b/i;
+const STANDALONE_SIDE_EFFECT = /^(?:local-only|dry-run)$/i;
 
 const RULES = [
   { code: 'missing-use-case', severity: 'warn', test: (t) => hasDeclaration(t, /\b(?:use when|when to use)\b/i, UNRESOLVED), message: 'Add a clear when-to-use section.' },
   { code: 'missing-inputs', severity: 'warn', test: (t) => hasDeclaration(t, /\b(?:inputs?|requires?|required)\b/i, UNRESOLVED, NO_INPUTS_REQUIRED), message: 'List required inputs or tools.' },
-  { code: 'missing-side-effects', severity: 'block', test: (t) => hasDeclaration(t, /\b(?:side effects?|local-only|no external|dry-run)\b/i, UNRESOLVED), message: 'State side-effect boundaries.' },
+  { code: 'missing-side-effects', severity: 'block', test: (t) => hasDeclaration(t, /\b(?:side effects?|local-only|no external|dry-run)\b/i, UNRESOLVED, undefined, STANDALONE_SIDE_EFFECT), message: 'State side-effect boundaries.' },
   { code: 'missing-approval', severity: 'block', test: (t) => hasDeclaration(t, /\b(?:approval|required before|ask before)\b/i, UNRESOLVED, NO_APPROVAL_REQUIRED), message: 'Declare approval requirements for external actions.' },
   { code: 'missing-validation', severity: 'warn', test: (t) => hasDeclaration(t, /\b(?:validate|validation|verification|tests?|smoke)\b/i, UNRESOLVED, NO_TESTS_REQUIRED), message: 'Describe validation or verification workflow.' }
 ];
