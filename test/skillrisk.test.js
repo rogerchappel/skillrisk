@@ -19,7 +19,7 @@ test('ignores readiness declarations inside Markdown HTML comments', () => {
 });
 
 test('comments cannot complete visible placeholder declarations', () => {
-  const result = auditSkill(`Use when TODO. Inputs: TBD.
+  const result = auditSkill(`When to use: TBD. Inputs: TBD.
 <!-- Side effects: local-only. Approval required before publishing. Validate with npm test. -->`);
   assert.equal(result.status, 'blocked');
   assert.deepEqual(result.findings.map((finding) => finding.code), [

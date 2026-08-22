@@ -1,9 +1,11 @@
-function withoutFencedExamples(text) {
-  return String(text || '').replace(/^ {0,3}(`{3,}|~{3,})[^\n]*\n[\s\S]*?^ {0,3}\1[ \t]*$/gm, '');
+function withoutNonRenderedMarkdown(text) {
+  return String(text || '')
+    .replace(/<!--[\s\S]*?-->/g, ' ')
+    .replace(/^ {0,3}(`{3,}|~{3,})[^\n]*\n[\s\S]*?^ {0,3}\1[ \t]*$/gm, '');
 }
 
 function hasDeclaration(text, affirmative, incomplete, explicitAbsence, standalone) {
-  return withoutFencedExamples(text)
+  return withoutNonRenderedMarkdown(text)
     .split(/[\n.!?]+/)
     .some((clause) => {
       const unresolvedClause = clause.replace(/\bno external\b/gi, 'external');
