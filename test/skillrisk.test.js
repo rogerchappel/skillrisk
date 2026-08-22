@@ -3,8 +3,34 @@ const assert = require('node:assert/strict');
 const { execFileSync, spawnSync } = require('node:child_process');
 const { auditSkill, formatReport } = require('../src/index');
 
+const completeSkill = 'Use when reviewing skills. Required inputs: SKILL.md. Side effects: none. Approval required before external writes. Validate with npm test.';
+
 test('passes complete skill text', () => {
-  const result = auditSkill('Use when reviewing skills. Required inputs: SKILL.md. Side effects: none. Approval required before external writes. Validate with npm test.');
+  const result = auditSkill(completeSkill);
+  assert.equal(result.status, 'pass');
+});
+
+test('ignores readiness declarations inside Markdown HTML comments', () => {
+  const result = auditSkill(`<!--\n${completeSkill}\n-->`);
+  assert.equal(result.status, 'blocked');
+  assert.deepEqual(result.findings.map((finding) => finding.code), [
+    'missing-use-case', 'missing-inputs', 'missing-side-effects', 'missing-approval', 'missing-validation'
+  ]);
+});
+
+test('comments cannot complete visible placeholder declarations', () => {
+  const result = auditSkill(`Use when TODO. Inputs: TBD.
+<!-- Side effects: local-only. Approval required before publishing. Validate with npm test. -->`);
+  assert.equal(result.status, 'blocked');
+  assert.deepEqual(result.findings.map((finding) => finding.code), [
+    'missing-use-case', 'missing-inputs', 'missing-side-effects', 'missing-approval', 'missing-validation'
+  ]);
+});
+
+test('keeps equivalent visible declarations around comments', () => {
+  const result = auditSkill(`Use when reviewing skills. <!-- internal note -->
+Required inputs: SKILL.md. Side effects: none.
+<!-- another note --> Approval required before external writes. Validate with npm test.`);
   assert.equal(result.status, 'pass');
 });
 
@@ -158,6 +184,29 @@ test('cli blocks negated boundary declarations from stdin', () => {
 test('cli passes explicit absence declarations from stdin', () => {
   const result = spawnSync(process.execPath, ['src/cli.js', '-', '--format=json'], {
     input: 'When to use: audit a local skill. Inputs: no inputs are required. Side effects: none. Approval: no approval is required. Validation: no tests are required.\n',
+    encoding: 'utf8',
+  });
+
+  assert.equal(result.status, 0);
+  assert.deepEqual(JSON.parse(result.stdout), { status: 'pass', findings: [] });
+});
+
+test('cli blocks declarations supplied only by Markdown HTML comments', () => {
+  const result = spawnSync(process.execPath, ['src/cli.js', '-', '--format=json'], {
+    input: `<!-- ${completeSkill} -->\n`,
+    encoding: 'utf8',
+  });
+
+  assert.equal(result.status, 2);
+  assert.deepEqual(
+    JSON.parse(result.stdout).findings.map((finding) => finding.code),
+    ['missing-use-case', 'missing-inputs', 'missing-side-effects', 'missing-approval', 'missing-validation']
+  );
+});
+
+test('cli accepts visible declarations mixed with Markdown HTML comments', () => {
+  const result = spawnSync(process.execPath, ['src/cli.js', '-', '--format=json'], {
+    input: `<!-- draft note -->\n${completeSkill}\n`,
     encoding: 'utf8',
   });
 
