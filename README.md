@@ -43,6 +43,8 @@ concise message and the usage line to stderr.
 
 Import from `src/index.js` in local automation.
 
+The audit evaluates rendered Markdown prose. Readiness declarations inside fenced code examples or HTML comments (`<!-- ... -->`) are ignored, so keep required use-case, input, side-effect, approval, and validation guidance visible.
+
 ## Limitations
 
 The package is intentionally local-first and does not publish, post, or write to external systems.

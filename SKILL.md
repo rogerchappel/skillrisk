@@ -8,6 +8,8 @@ Use skillrisk when reviewing a SKILL.md proposal for missing approvals, side-eff
 
 - A local fixture or text file relevant to the review.
 
+The checker evaluates rendered Markdown prose. It ignores declarations inside fenced code examples and HTML comments (`<!-- ... -->`); readiness guidance must be visible to readers.
+
 ## Side Effects
 
 This skill is local-only. It reads supplied files and writes output to stdout unless the caller redirects it.
