@@ -1,7 +1,35 @@
+function withoutInlineCode(text) {
+  let result = '';
+  for (let index = 0; index < text.length;) {
+    if (text[index] !== '`') {
+      result += text[index++];
+      continue;
+    }
+
+    let end = index;
+    while (text[end] === '`') end++;
+    const delimiter = text.slice(index, end);
+    let closing = text.indexOf(delimiter, end);
+    while (closing !== -1 && (text[closing - 1] === '`' || text[closing + delimiter.length] === '`')) {
+      closing = text.indexOf(delimiter, closing + delimiter.length);
+    }
+    if (closing === -1) {
+      result += delimiter;
+      index = end;
+      continue;
+    }
+
+    result += ' ';
+    index = closing + delimiter.length;
+  }
+  return result;
+}
+
 function withoutNonRenderedMarkdown(text) {
-  return String(text || '')
+  const visible = String(text || '')
     .replace(/<!--[\s\S]*?-->/g, ' ')
     .replace(/^ {0,3}(`{3,}|~{3,})[^\n]*\n[\s\S]*?^ {0,3}\1[ \t]*$/gm, '');
+  return withoutInlineCode(visible);
 }
 
 function hasDeclaration(text, affirmative, incomplete, explicitAbsence, standalone) {
