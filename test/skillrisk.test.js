@@ -34,6 +34,22 @@ Required inputs: SKILL.md. Side effects: none.
   assert.equal(result.status, 'pass');
 });
 
+test('ignores readiness declarations supplied only by inline code', () => {
+  const result = auditSkill('Examples: `When to use: repository reviews`, `Inputs required: repository path`, `Side effects: local-only`, `Approval required before publishing`, and `Validation: run tests`.');
+
+  assert.equal(result.status, 'blocked');
+  assert.deepEqual(result.findings.map((finding) => finding.code), [
+    'missing-use-case', 'missing-inputs', 'missing-side-effects', 'missing-approval', 'missing-validation'
+  ]);
+});
+
+test('keeps visible declarations surrounding inline code examples', () => {
+  const result = auditSkill('Use when reviewing skills, including `When to use: example`. Required inputs: SKILL.md. Side effects: none. Approval required before external writes. Validate with `npm test`.');
+
+  assert.equal(result.status, 'pass');
+  assert.deepEqual(result.findings, []);
+});
+
 test('rejects empty and placeholder-only readiness sections', () => {
   const cases = [
     '## When to use\n## Inputs\n## Side effects\n## Approval requirements\n## Validation',
@@ -212,6 +228,19 @@ test('cli accepts visible declarations mixed with Markdown HTML comments', () =>
 
   assert.equal(result.status, 0);
   assert.deepEqual(JSON.parse(result.stdout), { status: 'pass', findings: [] });
+});
+
+test('cli blocks declarations supplied only by inline code', () => {
+  const result = spawnSync(process.execPath, ['src/cli.js', '-', '--format=json'], {
+    input: 'Examples: `When to use: reviews` `Inputs required: path` `Side effects: local-only` `Approval required before publishing` `Validation: run tests`\n',
+    encoding: 'utf8',
+  });
+
+  assert.equal(result.status, 2);
+  assert.deepEqual(
+    JSON.parse(result.stdout).findings.map((finding) => finding.code),
+    ['missing-use-case', 'missing-inputs', 'missing-side-effects', 'missing-approval', 'missing-validation']
+  );
 });
 
 test('cli accepts standalone side-effect declarations from stdin', () => {
