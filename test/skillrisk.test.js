@@ -50,6 +50,36 @@ test('keeps visible declarations surrounding inline code examples', () => {
   assert.deepEqual(result.findings, []);
 });
 
+test('ignores declarations inside variable-length fenced code blocks', () => {
+  for (const fenced of [
+    `\`\`\`text\n${completeSkill}\n\`\`\`\``,
+    `~~~~ markdown\n${completeSkill}\n~~~~~~`,
+  ]) {
+    const result = auditSkill(fenced);
+    assert.equal(result.status, 'blocked', fenced);
+    assert.deepEqual(result.findings.map((finding) => finding.code), [
+      'missing-use-case', 'missing-inputs', 'missing-side-effects', 'missing-approval', 'missing-validation'
+    ]);
+  }
+});
+
+test('ignores declarations inside indented code blocks', () => {
+  for (const prefix of ['    ', '\t']) {
+    const result = auditSkill(prefix + completeSkill);
+    assert.equal(result.status, 'blocked', JSON.stringify(prefix));
+    assert.deepEqual(result.findings.map((finding) => finding.code), [
+      'missing-use-case', 'missing-inputs', 'missing-side-effects', 'missing-approval', 'missing-validation'
+    ]);
+  }
+});
+
+test('keeps visible prose around fenced and indented code blocks', () => {
+  const result = auditSkill(`Use when reviewing skills.\n\n\`\`\`text\n${completeSkill}\n\`\`\`\`\n\n    Side effects: external writes.\n\nRequired inputs: SKILL.md. Side effects: none.\nApproval required before external writes. Validate with npm test.`);
+
+  assert.equal(result.status, 'pass');
+  assert.deepEqual(result.findings, []);
+});
+
 test('rejects empty and placeholder-only readiness sections', () => {
   const cases = [
     '## When to use\n## Inputs\n## Side effects\n## Approval requirements\n## Validation',
