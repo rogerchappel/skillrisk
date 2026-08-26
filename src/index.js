@@ -26,9 +26,23 @@ function withoutInlineCode(text) {
 }
 
 function withoutNonRenderedMarkdown(text) {
-  const visible = String(text || '')
-    .replace(/<!--[\s\S]*?-->/g, ' ')
-    .replace(/^ {0,3}(`{3,}|~{3,})[^\n]*\n[\s\S]*?^ {0,3}\1[ \t]*$/gm, '');
+  const lines = String(text || '').replace(/<!--[\s\S]*?-->/g, ' ').split('\n');
+  let fence = null;
+  const visible = lines.map((line) => {
+    if (fence) {
+      const closing = line.match(/^ {0,3}(`+|~+)[ \t]*$/);
+      if (closing && closing[1][0] === fence.marker && closing[1].length >= fence.length) fence = null;
+      return '';
+    }
+
+    const opening = line.match(/^ {0,3}(`{3,}|~{3,})(.*)$/);
+    if (opening && !(opening[1][0] === '`' && opening[2].includes('`'))) {
+      fence = { marker: opening[1][0], length: opening[1].length };
+      return '';
+    }
+
+    return /^(?: {4}|\t)/.test(line) ? '' : line;
+  }).join('\n');
   return withoutInlineCode(visible);
 }
 
