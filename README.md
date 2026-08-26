@@ -43,7 +43,7 @@ concise message and the usage line to stderr.
 
 Import from `src/index.js` in local automation.
 
-The audit evaluates rendered Markdown prose. Readiness declarations inside inline code, fenced code examples, or HTML comments (`<!-- ... -->`) are ignored, so keep required use-case, input, side-effect, approval, and validation guidance visible as prose.
+The audit evaluates rendered Markdown prose. Readiness declarations inside inline code, HTML comments (`<!-- ... -->`), four-space/tab-indented code blocks, or backtick/tilde fenced code blocks are ignored. Closing fences may be longer than their opener, following CommonMark. Keep required use-case, input, side-effect, approval, and validation guidance visible as prose.
 
 ## Limitations
 
@@ -59,7 +59,7 @@ common explicit uncertainty forms such as “cannot be determined”, “don't k
 “isn't known”, and “haven't determined”. Explicit forms such as “Side effects: none”, “local-only”,
 “no external writes”, “dry-run”, “approval required before”, and “ask before” remain affirmative
 declarations. `local-only` and `dry-run` may each be the entire clause (ignoring surrounding
-whitespace and punctuation); inline-code and fenced examples are excluded from declaration matching. The
+whitespace and punctuation); inline code, fenced examples, and indented code blocks are excluded from declaration matching. The
 corresponding readiness rules also accept the explicit absence forms “no inputs
 are required”, “no approval is required”, and “no tests are required”; reversed or qualified
 negations such as “inputs are not required” or “no documented inputs are required” remain

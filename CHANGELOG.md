@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Exclude CommonMark backtick/tilde fences with longer closing fences and indented code blocks from readiness declarations.
+
 - Commit and enforce the npm lockfile for reproducible CI and release verification.
 - Require substantive content after readiness headings and labels instead of accepting empty section skeletons.
 - Add `--format=json` CLI output for automation-friendly release checks.
