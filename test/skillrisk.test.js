@@ -34,6 +34,21 @@ Required inputs: SKILL.md. Side effects: none.
   assert.equal(result.status, 'pass');
 });
 
+test('ignores readiness declarations after an unclosed HTML comment', () => {
+  const result = auditSkill(`<!-- internal note
+${completeSkill}`);
+  assert.equal(result.status, 'blocked');
+  assert.deepEqual(result.findings.map((finding) => finding.code), [
+    'missing-use-case', 'missing-inputs', 'missing-side-effects', 'missing-approval', 'missing-validation'
+  ]);
+});
+
+test('keeps visible declarations before an unclosed HTML comment', () => {
+  const result = auditSkill(`${completeSkill}\n<!-- unfinished internal note`);
+  assert.equal(result.status, 'pass');
+  assert.deepEqual(result.findings, []);
+});
+
 test('ignores readiness declarations supplied only by inline code', () => {
   const result = auditSkill('Examples: `When to use: repository reviews`, `Inputs required: repository path`, `Side effects: local-only`, `Approval required before publishing`, and `Validation: run tests`.');
 
@@ -213,6 +228,19 @@ test('does not generalize explicit absence declarations to unresolved negations'
       declarations
     );
   }
+});
+
+test('cli ignores declarations inside unclosed HTML comments from stdin', () => {
+  const result = spawnSync(process.execPath, ['src/cli.js', '-', '--format=json'], {
+    cwd: process.cwd(),
+    encoding: 'utf8',
+    input: `<!-- unfinished\n${completeSkill}`
+  });
+
+  assert.equal(result.status, 2);
+  assert.deepEqual(JSON.parse(result.stdout).findings.map((finding) => finding.code), [
+    'missing-use-case', 'missing-inputs', 'missing-side-effects', 'missing-approval', 'missing-validation'
+  ]);
 });
 
 test('cli blocks negated boundary declarations from stdin', () => {
