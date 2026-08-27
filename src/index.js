@@ -26,7 +26,7 @@ function withoutInlineCode(text) {
 }
 
 function withoutNonRenderedMarkdown(text) {
-  const lines = String(text || '').replace(/<!--[\s\S]*?-->/g, ' ').split('\n');
+  const lines = String(text || '').replace(/<!--[\s\S]*?(?:-->|$)/g, ' ').split('\n');
   let fence = null;
   const visible = lines.map((line) => {
     if (fence) {
