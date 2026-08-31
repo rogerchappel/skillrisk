@@ -1,4 +1,10 @@
 function withoutInlineCode(text) {
+  const isEscaped = (position) => {
+    let backslashes = 0;
+    for (let index = position - 1; index >= 0 && text[index] === '\\'; index--) backslashes++;
+    return backslashes % 2 === 1;
+  };
+
   let result = '';
   for (let index = 0; index < text.length;) {
     if (text[index] !== '`') {
@@ -9,8 +15,16 @@ function withoutInlineCode(text) {
     let end = index;
     while (text[end] === '`') end++;
     const delimiter = text.slice(index, end);
+    if (isEscaped(index)) {
+      result += delimiter;
+      index = end;
+      continue;
+    }
+
     let closing = text.indexOf(delimiter, end);
-    while (closing !== -1 && (text[closing - 1] === '`' || text[closing + delimiter.length] === '`')) {
+    while (closing !== -1 && (
+      isEscaped(closing) || text[closing - 1] === '`' || text[closing + delimiter.length] === '`'
+    )) {
       closing = text.indexOf(delimiter, closing + delimiter.length);
     }
     if (closing === -1) {
