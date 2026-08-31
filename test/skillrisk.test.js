@@ -65,6 +65,18 @@ test('keeps visible declarations surrounding inline code examples', () => {
   assert.deepEqual(result.findings, []);
 });
 
+test('keeps backslash-escaped backtick runs visible while excluding genuine inline code', () => {
+  for (const boundary of [
+    'Side effects: \\`local-only\\`.',
+    'Side effects: \\``local-only\\``.',
+  ]) {
+    const result = auditSkill(`Use when reviewing skills. Required inputs: SKILL.md. ${boundary} Approval required before external writes. Validate with npm test. Example: \`Side effects: external writes\`.`);
+
+    assert.equal(result.status, 'pass', boundary);
+    assert.deepEqual(result.findings, [], boundary);
+  }
+});
+
 test('ignores declarations inside variable-length fenced code blocks', () => {
   for (const fenced of [
     `\`\`\`text\n${completeSkill}\n\`\`\`\``,
@@ -299,6 +311,21 @@ test('cli blocks declarations supplied only by inline code', () => {
     JSON.parse(result.stdout).findings.map((finding) => finding.code),
     ['missing-use-case', 'missing-inputs', 'missing-side-effects', 'missing-approval', 'missing-validation']
   );
+});
+
+test('cli accepts declarations inside escaped single and multi-backtick literals', () => {
+  for (const boundary of [
+    'Side effects: \\`local-only\\`.',
+    'Side effects: \\``local-only\\``.',
+  ]) {
+    const result = spawnSync(process.execPath, ['src/cli.js', '-', '--format=json'], {
+      input: `Use when reviewing. Inputs required. ${boundary} Approval required before publishing. Validate with npm test. Example: \`Side effects: external writes\`.\n`,
+      encoding: 'utf8',
+    });
+
+    assert.equal(result.status, 0, boundary);
+    assert.deepEqual(JSON.parse(result.stdout), { status: 'pass', findings: [] }, boundary);
+  }
 });
 
 test('cli accepts standalone side-effect declarations from stdin', () => {
