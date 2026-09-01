@@ -107,6 +107,17 @@ test('keeps visible prose around fenced and indented code blocks', () => {
   assert.deepEqual(result.findings, []);
 });
 
+test('comment markers inside fenced code cannot hide later visible declarations', () => {
+  for (const fenced of [
+    `\`\`\`text\n<!-- unfinished comment\n\`\`\``,
+    `~~~text\n<!-- comment closed inside code -->\n~~~`,
+  ]) {
+    const result = auditSkill(`${fenced}\n${completeSkill}`);
+    assert.equal(result.status, 'pass', fenced);
+    assert.deepEqual(result.findings, [], fenced);
+  }
+});
+
 test('rejects empty and placeholder-only readiness sections', () => {
   const cases = [
     '## When to use\n## Inputs\n## Side effects\n## Approval requirements\n## Validation',
@@ -253,6 +264,22 @@ test('cli ignores declarations inside unclosed HTML comments from stdin', () => 
   assert.deepEqual(JSON.parse(result.stdout).findings.map((finding) => finding.code), [
     'missing-use-case', 'missing-inputs', 'missing-side-effects', 'missing-approval', 'missing-validation'
   ]);
+});
+
+test('cli keeps declarations after fenced comment markers from stdin', () => {
+  for (const fenced of [
+    `\`\`\`md\n<!-- unfinished comment\n\`\`\``,
+    `~~~~md\n<!-- closed comment -->\n~~~~`,
+  ]) {
+    const result = spawnSync(process.execPath, ['src/cli.js', '-', '--format=json'], {
+      cwd: process.cwd(),
+      encoding: 'utf8',
+      input: `${fenced}\n${completeSkill}`,
+    });
+
+    assert.equal(result.status, 0, fenced);
+    assert.deepEqual(JSON.parse(result.stdout), { status: 'pass', findings: [] }, fenced);
+  }
 });
 
 test('cli blocks negated boundary declarations from stdin', () => {
