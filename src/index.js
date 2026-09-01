@@ -40,13 +40,21 @@ function withoutInlineCode(text) {
 }
 
 function withoutNonRenderedMarkdown(text) {
-  const lines = String(text || '').replace(/<!--[\s\S]*?(?:-->|$)/g, ' ').split('\n');
+  const lines = String(text || '').split('\n');
   let fence = null;
+  let comment = false;
   const visible = lines.map((line) => {
     if (fence) {
       const closing = line.match(/^ {0,3}(`+|~+)[ \t]*$/);
       if (closing && closing[1][0] === fence.marker && closing[1].length >= fence.length) fence = null;
       return '';
+    }
+
+    if (comment) {
+      const closing = line.indexOf('-->');
+      if (closing === -1) return '';
+      comment = false;
+      line = line.slice(closing + 3);
     }
 
     const opening = line.match(/^ {0,3}(`{3,}|~{3,})(.*)$/);
@@ -55,7 +63,25 @@ function withoutNonRenderedMarkdown(text) {
       return '';
     }
 
-    return /^(?: {4}|\t)/.test(line) ? '' : line;
+    if (/^(?: {4}|\t)/.test(line)) return '';
+
+    let rendered = '';
+    for (let index = 0; index < line.length;) {
+      const openingComment = line.indexOf('<!--', index);
+      if (openingComment === -1) {
+        rendered += line.slice(index);
+        break;
+      }
+      rendered += line.slice(index, openingComment);
+      const closingComment = line.indexOf('-->', openingComment + 4);
+      if (closingComment === -1) {
+        comment = true;
+        break;
+      }
+      rendered += ' ';
+      index = closingComment + 3;
+    }
+    return rendered;
   }).join('\n');
   return withoutInlineCode(visible);
 }
