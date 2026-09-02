@@ -118,6 +118,32 @@ test('comment markers inside fenced code cannot hide later visible declarations'
   }
 });
 
+test('inline-code comment markers cannot hide later visible declarations', () => {
+  for (const literal of [
+    '`<!--`',
+    '``<!--``',
+    '`-->`',
+    '``-->``',
+  ]) {
+    const result = auditSkill(`Example literal: ${literal}. ${completeSkill}`);
+    assert.equal(result.status, 'pass', literal);
+    assert.deepEqual(result.findings, [], literal);
+  }
+});
+
+test('cli treats inline-code comment markers as literal rendered code', () => {
+  for (const literal of ['`<!--`', '``<!--``', '`-->`', '``-->``']) {
+    const result = spawnSync(process.execPath, ['src/cli.js', '-', '--format=json'], {
+      cwd: process.cwd(),
+      encoding: 'utf8',
+      input: `Example literal: ${literal}. ${completeSkill}`
+    });
+
+    assert.equal(result.status, 0, `${literal}: ${result.stderr}`);
+    assert.equal(JSON.parse(result.stdout).status, 'pass', literal);
+  }
+});
+
 test('rejects empty and placeholder-only readiness sections', () => {
   const cases = [
     '## When to use\n## Inputs\n## Side effects\n## Approval requirements\n## Validation',
