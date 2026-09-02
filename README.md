@@ -45,6 +45,7 @@ Import from `src/index.js` in local automation.
 
 The audit evaluates rendered Markdown prose. Readiness declarations inside genuine inline code, HTML comments (`<!-- ... -->`), four-space/tab-indented code blocks, or backtick/tilde fenced code blocks are ignored. Backslash-escaped backtick literals remain visible prose rather than opening or closing inline code. An unclosed HTML comment hides everything from its opening marker through the end of the input, matching rendered Markdown behavior; visible prose before it remains eligible. Closing fences may be longer than their opener, following CommonMark. Keep required use-case, input, side-effect, approval, and validation guidance visible as prose.
 HTML comment markers inside fenced code are treated as literal code, so they cannot hide visible declarations after the closing fence.
+Likewise, `<!--` and `-->` inside matched single- or variable-length inline-code spans are literal code, not comment boundaries; genuine comments and the inline-code contents remain excluded from readiness matching.
 
 ## Limitations
 
