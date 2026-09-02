@@ -42,19 +42,11 @@ function withoutInlineCode(text) {
 function withoutNonRenderedMarkdown(text) {
   const lines = String(text || '').split('\n');
   let fence = null;
-  let comment = false;
-  const visible = lines.map((line) => {
+  const prose = lines.map((line) => {
     if (fence) {
       const closing = line.match(/^ {0,3}(`+|~+)[ \t]*$/);
       if (closing && closing[1][0] === fence.marker && closing[1].length >= fence.length) fence = null;
       return '';
-    }
-
-    if (comment) {
-      const closing = line.indexOf('-->');
-      if (closing === -1) return '';
-      comment = false;
-      line = line.slice(closing + 3);
     }
 
     const opening = line.match(/^ {0,3}(`{3,}|~{3,})(.*)$/);
@@ -64,6 +56,18 @@ function withoutNonRenderedMarkdown(text) {
     }
 
     if (/^(?: {4}|\t)/.test(line)) return '';
+
+    return line;
+  }).join('\n');
+
+  let comment = false;
+  const visible = withoutInlineCode(prose).split('\n').map((line) => {
+    if (comment) {
+      const closing = line.indexOf('-->');
+      if (closing === -1) return '';
+      comment = false;
+      line = line.slice(closing + 3);
+    }
 
     let rendered = '';
     for (let index = 0; index < line.length;) {
@@ -83,7 +87,7 @@ function withoutNonRenderedMarkdown(text) {
     }
     return rendered;
   }).join('\n');
-  return withoutInlineCode(visible);
+  return visible;
 }
 
 function hasDeclaration(text, affirmative, incomplete, explicitAbsence, standalone) {
