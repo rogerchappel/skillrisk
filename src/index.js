@@ -40,7 +40,7 @@ function withoutInlineCode(text) {
 }
 
 function withoutNonRenderedMarkdown(text) {
-  const lines = String(text || '').split('\n');
+  const lines = String(text || '').split(/\r\n?|\n/);
   let fence = null;
   const prose = lines.map((line) => {
     if (fence) {
