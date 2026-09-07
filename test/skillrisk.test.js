@@ -90,6 +90,28 @@ test('ignores declarations inside variable-length fenced code blocks', () => {
   }
 });
 
+test('ignores fenced declarations across supported line endings', () => {
+  for (const [name, newline] of [['LF', '\n'], ['CRLF', '\r\n'], ['CR', '\r']]) {
+    for (const fence of ['```text', '~~~ markdown']) {
+      const result = auditSkill([fence, completeSkill, fence.slice(0, 3)].join(newline));
+      assert.equal(result.status, 'blocked', `${name}: ${fence}`);
+      assert.deepEqual(result.findings.map((finding) => finding.code), [
+        'missing-use-case', 'missing-inputs', 'missing-side-effects', 'missing-approval', 'missing-validation'
+      ], `${name}: ${fence}`);
+    }
+  }
+});
+
+test('keeps visible prose after fences across supported line endings', () => {
+  for (const [name, newline] of [['LF', '\n'], ['CRLF', '\r\n'], ['CR', '\r']]) {
+    for (const marker of ['```', '~~~']) {
+      const result = auditSkill([marker, 'example', marker, completeSkill].join(newline));
+      assert.equal(result.status, 'pass', `${name}: ${marker}`);
+      assert.deepEqual(result.findings, [], `${name}: ${marker}`);
+    }
+  }
+});
+
 test('ignores declarations inside indented code blocks', () => {
   for (const prefix of ['    ', '\t']) {
     const result = auditSkill(prefix + completeSkill);
@@ -305,6 +327,28 @@ test('cli keeps declarations after fenced comment markers from stdin', () => {
 
     assert.equal(result.status, 0, fenced);
     assert.deepEqual(JSON.parse(result.stdout), { status: 'pass', findings: [] }, fenced);
+  }
+});
+
+test('cli handles fenced declarations across supported line endings', () => {
+  for (const [name, newline] of [['LF', '\n'], ['CRLF', '\r\n'], ['CR', '\r']]) {
+    for (const marker of ['```', '~~~']) {
+      const hidden = spawnSync(process.execPath, ['src/cli.js', '-', '--format=json'], {
+        cwd: process.cwd(),
+        encoding: 'utf8',
+        input: [marker, completeSkill, marker].join(newline),
+      });
+      assert.equal(hidden.status, 2, `${name}: hidden ${marker}`);
+      assert.equal(JSON.parse(hidden.stdout).status, 'blocked', `${name}: hidden ${marker}`);
+
+      const visible = spawnSync(process.execPath, ['src/cli.js', '-', '--format=json'], {
+        cwd: process.cwd(),
+        encoding: 'utf8',
+        input: [marker, 'example', marker, completeSkill].join(newline),
+      });
+      assert.equal(visible.status, 0, `${name}: visible ${marker}`);
+      assert.deepEqual(JSON.parse(visible.stdout), { status: 'pass', findings: [] }, `${name}: visible ${marker}`);
+    }
   }
 });
 
