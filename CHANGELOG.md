@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Parse LF, CRLF, and CR Markdown line endings consistently when excluding fenced code from readiness declarations.
 - Exclude CommonMark backtick/tilde fences with longer closing fences and indented code blocks from readiness declarations.
 
 - Commit and enforce the npm lockfile for reproducible CI and release verification.
