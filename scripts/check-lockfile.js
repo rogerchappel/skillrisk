@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 
-const root = process.cwd();
+function checkLockfile(root = process.cwd()) {
 const lockfile = path.join(root, 'package-lock.json');
 
 if (!fs.existsSync(lockfile)) {
@@ -29,4 +29,11 @@ try {
   fs.rmSync(temporary, { recursive: true, force: true });
 }
 
-console.log('package-lock.json matches package.json');
+return 'package-lock.json matches package.json';
+}
+
+if (require.main === module) {
+  console.log(checkLockfile());
+}
+
+module.exports = { checkLockfile };
